@@ -1,0 +1,73 @@
+//CsvList
+.csv-list {
+  text-align: left;
+  padding-left: 20px;
+
+  .selected {
+    background: #39D2B4;
+    color: #fff;
+    padding: 0px 5px;
+  }
+}
+//CsvInput
+.upload-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .upload-requirements {
+    text-align: left;
+    font-size: 14px;
+    margin-left: 20px;
+  }
+}
+
+.input-file-container {
+  position: relative;
+  width: 225px;
+}
+
+.input-file-trigger {
+  display: block;
+  padding: 14px 45px;
+  background: #39D2B4;
+  color: #fff;
+  font-size: 1em;
+  transition: all .4s;
+  cursor: pointer;
+}
+
+.input-file {
+  position: absolute;
+  top: 0; left: 0;
+  width: 225px;
+  opacity: 0;
+  padding: 14px 0;
+  cursor: pointer;
+}
+
+//CsvPreview
+.column-header {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 10px;
+
+  >div {
+    margin: 0 10px;
+  }
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+
+  &:hover{
+    background-color: #ddd;
+  }
+
+  .column {
+    width: 20%;
+    margin: 0 10px;
+
+  }
+}

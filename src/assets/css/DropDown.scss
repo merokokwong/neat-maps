@@ -1,0 +1,25 @@
+.select-box {
+  position: relative;
+
+  &::after {
+	  font-family: FontAwesome;
+  	content: '\f107';
+  	font-size: 12px;
+  	position: absolute;
+  	top: 14px;
+  	right: 10px;
+  	color: #434B67;
+  	pointer-events: none;
+  }
+
+
+  select {
+     appearance: none;       /* Remove default arrow */
+     border: 1px solid #ddd;
+     background-color: transparent;
+     border-radius: 4px;
+     padding: 10px 25px 10px 15px;
+     font-size: 16px;
+     color: #3F3F3F;
+  }
+}

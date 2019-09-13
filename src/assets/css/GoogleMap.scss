@@ -1,0 +1,25 @@
+.google-map {
+  display: flex;
+  justify-content: space-around;
+
+  .vue-map-container {
+    width: 70%;
+    height: 400px;
+  }
+
+  .category-color {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: flex-start;
+
+    >div {
+      display: flex;
+      align-items: center;
+
+      >img {
+        padding-right: 10px;
+      }
+    }
+  }
+}
