@@ -89,6 +89,7 @@ export default {
       }
     },
     searchLocation(data) {
+      /* global google */
       let geocoder = new google.maps.Geocoder();
       let address = data.ADDRESS.concat(data.CITY, data.STATE, data.ZIPCODE);
 

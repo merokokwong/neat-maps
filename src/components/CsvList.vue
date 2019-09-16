@@ -152,14 +152,14 @@ export default {
     createMarkerColor(uniqueCategory) {
       let result = [];
       let color = [
-        "FE7569",
-        "FFFF99",
-        "4B8B3B",
-        "1245A8",
-        "FFC300",
-        "800080",
-        "FF00FF",
-        "008080"
+        "449DD1",
+        "13D8AA",
+        "FEB019",
+        "FF4560",
+        "775DD0",
+        "3F51B5",
+        "4CAF50",
+        "D7263D"
       ];
 
       for (var i = 0; i < uniqueCategory.length; i++) {
