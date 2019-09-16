@@ -10,7 +10,8 @@
       ></gmap-marker>
     </gmap-map>
 
-    <div class="category-color">
+    <div class="category-color" v-if="markerColor.length > 0">
+      <h4>Category Markers</h4>
       <div v-for="obj in markerColor" :key="obj.color">
         <img
           :src="
@@ -48,8 +49,6 @@ export default {
     }
   },
   mounted() {
-    this.geolocate();
-
     EventBus.$on("get-csv-location", csv => {
       let chunkArray = this.chunk(csv.data, 10);
       this.loopSearch(chunkArray[0]);
@@ -66,10 +65,11 @@ export default {
       }
     });
 
-    EventBus.$on("add-marker", markers => {
-      for (var i = 0; i < markers.length; i++) {
-        this.addMarker(markers[i].lat, markers[i].lng, markers[i].color);
-      }
+    EventBus.$on("recenter-gmap", lastMarker => {
+      let lat = lastMarker.position.lat;
+      let lng = lastMarker.position.lng;
+
+      (this.center.lat = lat), (this.center.lng = lng), (this.zoom = 8);
     });
   },
 
@@ -108,28 +108,6 @@ export default {
     // receives a place object via the autocomplete component
     setPlace(place) {
       this.currentPlace = place;
-    },
-    addMarker(lat, lng, color) {
-      let url =
-        "https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=•|";
-
-      this.markers.push({
-        position: {
-          lat: lat,
-          lng: lng
-        },
-        icon: {
-          url: url + color
-        }
-      });
-    },
-    geolocate() {
-      navigator.geolocation.getCurrentPosition(position => {
-        this.center = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude
-        };
-      });
     }
   }
 };

@@ -11,6 +11,7 @@
           type="file"
           ref="file"
           v-on:change="handleFileSelect()"
+          accept=".csv"
         />
         <label tabindex="0" for="my-file" class="input-file-trigger"
           >Select a file...</label
@@ -31,7 +32,6 @@
 </template>
 
 <script>
-import Papa from "papaparse";
 import { EventBus } from "../eventBus.js";
 import store from "../store.js";
 
@@ -39,13 +39,14 @@ export default {
   name: "CsvInput",
   methods: {
     handleFileSelect() {
-      //TODO: check file type
       let file = this.$refs.file.files[0];
       let uuid = this.uniqueId();
       let csv = { file: file, uuid: uuid, data: [] };
       if (file) {
         store.commit("selectCsv", uuid);
         store.commit("updateCsvList", csv);
+        //open CsvPreview
+        EventBus.$emit("open-csv-preview", uuid);
       }
     },
     uniqueId() {

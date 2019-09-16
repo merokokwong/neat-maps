@@ -50,7 +50,6 @@
 .column-header {
   display: flex;
   justify-content: space-around;
-  margin-bottom: 10px;
 
   >div {
     margin: 0 10px;
@@ -60,14 +59,24 @@
 .row {
   display: flex;
   justify-content: space-between;
-
-  &:hover{
-    background-color: #ddd;
-  }
+  margin-bottom: 10px;
 
   .column {
     width: 20%;
     margin: 0 10px;
 
+  }
+}
+
+.error-msg {
+  margin: 10px;
+  color: red;
+}
+
+.is-loading {
+  display: flex;
+  align-items: center;
+  >p {
+    margin-right: 20px;
   }
 }

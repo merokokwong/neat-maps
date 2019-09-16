@@ -6,7 +6,7 @@
         Will keep the most recent 3 CSV.
       </p>
       <ol>
-        <li v-for="obj in csvList">
+        <li v-for="obj in csvList" :key="obj.file.uuid">
           <span :class="{ selected: obj.uuid == currentCsvId }">
             {{ obj.file.name }}
           </span>
@@ -34,21 +34,31 @@
         <h3 class="modal-title">CSV: {{ modalTitle }}</h3>
         <p>
           Please select the correct column name <br />
-          accroding to the first row of this CSV.
+          accroding to the first row of this CSV. <br />
+          Value should not be duplicate.
         </p>
       </div>
       <div slot="body">
         <CsvPreview ref="child" />
+        <div class="error-msg" v-if="error">
+          {{ error }}
+        </div>
       </div>
       <div slot="footer">
         <button
+          v-if="!isLoading"
           type="button"
           name="button"
           class="btn-green"
           v-on:click="handleMapColumns()"
         >
-          Map Columns
+          Map Column
         </button>
+
+        <div class="is-loading" v-if="isLoading">
+          <p>Just few seconds, stay with me!</p>
+          <Spinner />
+        </div>
       </div>
     </modal>
   </div>
@@ -58,6 +68,7 @@
 import Papa from "papaparse";
 import { EventBus } from "../eventBus.js";
 import CsvPreview from "./CsvPreview.vue";
+import Spinner from "./Spinner.vue";
 import Modal from "./Modal.vue";
 import store from "../store.js";
 
@@ -65,12 +76,15 @@ export default {
   name: "CsvList",
   components: {
     CsvPreview,
-    Modal
+    Modal,
+    Spinner
   },
   data() {
     return {
       isModalVisible: false,
-      modalTitle: null
+      modalTitle: null,
+      isLoading: false,
+      error: null
     };
   },
   computed: {
@@ -85,11 +99,17 @@ export default {
     EventBus.$on("geocode-data", payLoad => {
       let fileLenght = this.$refs.child.csvData().data.length;
       let currentCsvObj = store.getters.currentCsvObj;
-      let newObj = currentCsvObj.data.push(payLoad);
+      let currentCsvId = store.state.currentCsvId;
+      currentCsvObj.data.push(payLoad);
 
       if (currentCsvObj.data.length === fileLenght) {
         this.closePreviewModal();
+        this.viewMap(currentCsvId);
       }
+    });
+
+    EventBus.$on("open-csv-preview", uuid => {
+      this.showPreviewModal(uuid);
     });
   },
   methods: {
@@ -122,10 +142,8 @@ export default {
         };
         markers.push(marker);
       });
-
       store.commit("updateMarkers", markers);
-
-      //TODO: zoom in & center map to first marker
+      EventBus.$emit("recenter-gmap", markers[markers.length - 1]);
     },
     colorForCategory(cat, markerColor) {
       let result = markerColor.find(obj => obj.category === cat);
@@ -136,8 +154,8 @@ export default {
       let color = [
         "FE7569",
         "FFFF99",
-        "008000",
-        "000080",
+        "4B8B3B",
+        "1245A8",
         "FFC300",
         "800080",
         "FF00FF",
@@ -175,33 +193,65 @@ export default {
         //TODO: return error to user
         error(errors) {
           console.log("error", errors);
+          this.error = errors;
         }
       });
     },
     closePreviewModal() {
       this.isModalVisible = false;
       this.modalTitle = null;
+      this.isLoading = false;
+      EventBus.$emit("clean-preview-data");
     },
-    handleMapColumns() {
-      //TODO: check columns map correct (no duplicate, no empty)
-      //TODO: adding loading msg
-      //TODO: clear columnMap
-      let col = this.$refs.child.columnsMap();
-      let data = this.$refs.child.csvData().data;
-      let uuid = this.$refs.child.csvData().uuid;
-
-      let result = data.map(row => {
-        return {
-          [col.col0]: row[0],
-          [col.col1]: row[1],
-          [col.col2]: row[2],
-          [col.col3]: row[3],
-          [col.col4]: row[4]
-        };
+    findDuplicates(arr) {
+      let duplicateItems = [];
+      arr.filter((item, index) => {
+        if (arr.indexOf(item) != index) {
+          duplicateItems.push(item);
+        }
       });
 
-      let csv = { uuid: uuid, data: result };
-      EventBus.$emit("get-csv-location", csv);
+      return duplicateItems;
+    },
+    checkMapColumns() {
+      // check columns map correct (no duplicate, no empty)
+      let col = this.$refs.child.columnsMap();
+      let value = Object.values(col);
+      let duplicate = this.findDuplicates(value);
+
+      for (var i = 0; i < value.length; i++) {
+        if (value[i] === null) {
+          this.error = "Please select value for each column.";
+        } else if (duplicate.length > 0) {
+          this.error = "Column can't be duplicate.";
+        }
+      }
+
+      return true;
+    },
+    handleMapColumns() {
+      this.error = null;
+      this.checkMapColumns();
+
+      if (this.error === null) {
+        this.isLoading = true;
+        let col = this.$refs.child.columnsMap();
+        let data = this.$refs.child.csvData().data;
+        let uuid = this.$refs.child.csvData().uuid;
+
+        let result = data.map(row => {
+          return {
+            [col.col0]: row[0],
+            [col.col1]: row[1],
+            [col.col2]: row[2],
+            [col.col3]: row[3],
+            [col.col4]: row[4]
+          };
+        });
+
+        let csv = { uuid: uuid, data: result };
+        EventBus.$emit("get-csv-location", csv);
+      }
     }
   }
 };
