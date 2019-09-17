@@ -97,11 +97,13 @@ export default {
   },
   mounted() {
     EventBus.$on("geocode-data", payLoad => {
+      // update store when each address return it's geo location
       let fileLenght = this.$refs.child.csvData().data.length;
       let currentCsvObj = store.getters.currentCsvObj;
       let currentCsvId = store.state.currentCsvId;
       currentCsvObj.data.push(payLoad);
 
+      // on the last address return, close modal and show address in map
       if (currentCsvObj.data.length === fileLenght) {
         this.closePreviewModal();
         this.viewMap(currentCsvId);
@@ -120,10 +122,12 @@ export default {
       let data = currentCsvObj.data;
       let markers = [];
 
+      // find unique CATEGORY and assign color code to each
       let allCategory = data.map(item => item.CATEGORY);
       let uniqueCategory = [...new Set(allCategory)];
       let markerColor = this.createMarkerColor(uniqueCategory);
 
+      // get marker for each address based on it's CATEGORY
       data.forEach(obj => {
         let lat = obj.lat;
         let lng = obj.lng;
@@ -142,7 +146,9 @@ export default {
         };
         markers.push(marker);
       });
+
       store.commit("updateMarkers", markers);
+      // zoom in & recenter the map to the last maker address
       EventBus.$emit("recenter-gmap", markers[markers.length - 1]);
     },
     colorForCategory(cat, markerColor) {
@@ -173,13 +179,13 @@ export default {
       return result;
     },
     showPreviewModal(uuid) {
-      this.isModalVisible = true;
-
       let currentCsvObj = store.getters.currentCsvObj;
-      this.modalTitle = currentCsvObj.file.name;
       let csv = currentCsvObj.file;
 
-      //get the CSV data to JSON
+      this.isModalVisible = true;
+      this.modalTitle = currentCsvObj.file.name;
+
+      // get the CSV data
       Papa.parse(csv, {
         skipEmptyLines: true,
         complete: result => {
@@ -188,9 +194,12 @@ export default {
             uuid: uuid,
             data: result.data
           };
+          // pass CSV data to CsvPreview
           EventBus.$emit("parse-csv", csv_input);
         },
         //TODO: return error to user
+        // check row <= 20
+        // check column === 5
         error(errors) {
           console.log("error", errors);
           this.error = errors;
@@ -229,27 +238,39 @@ export default {
 
       return true;
     },
+    mapDataToCol(data, col) {
+      let result = data.map(row => {
+        return {
+          [col.col0]: row[0],
+          [col.col1]: row[1],
+          [col.col2]: row[2],
+          [col.col3]: row[3],
+          [col.col4]: row[4]
+        };
+      });
+
+      return result;
+    },
     handleMapColumns() {
+      // clean error state, then check coloumn values
       this.error = null;
       this.checkMapColumns();
 
+      // if column map is vaild, get csv data and
+      // and return data with column key
       if (this.error === null) {
         this.isLoading = true;
         let col = this.$refs.child.columnsMap();
         let data = this.$refs.child.csvData().data;
         let uuid = this.$refs.child.csvData().uuid;
 
-        let result = data.map(row => {
-          return {
-            [col.col0]: row[0],
-            [col.col1]: row[1],
-            [col.col2]: row[2],
-            [col.col3]: row[3],
-            [col.col4]: row[4]
-          };
-        });
+        let result = this.mapDataToCol(data, col);
+        let csv = {
+          uuid: uuid,
+          data: result
+        };
 
-        let csv = { uuid: uuid, data: result };
+        // after get the column key, can get geo location
         EventBus.$emit("get-csv-location", csv);
       }
     }

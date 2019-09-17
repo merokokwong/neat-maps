@@ -41,7 +41,12 @@ export default {
     handleFileSelect() {
       let file = this.$refs.file.files[0];
       let uuid = this.uniqueId();
-      let csv = { file: file, uuid: uuid, data: [] };
+      let csv = {
+        file: file,
+        uuid: uuid,
+        data: []
+      };
+
       if (file) {
         store.commit("selectCsv", uuid);
         store.commit("updateCsvList", csv);

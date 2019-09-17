@@ -33,11 +33,9 @@ export default {
   name: "GoogleMap",
   data() {
     return {
+      // center the map to US
       center: { lat: 39.8097343, lng: -98.5556199 },
-      zoom: 4,
-      //TODO: need places?
-      places: [],
-      currentPlace: null
+      zoom: 4
     };
   },
   computed: {
@@ -50,11 +48,13 @@ export default {
   },
   mounted() {
     EventBus.$on("get-csv-location", csv => {
+      // chunk csv to every 10, to avoide hitting "OVER_QUERY_LIMIT".
       let chunkArray = this.chunk(csv.data, 10);
+      // send the first 10 request, and wait 10s before sending the next request
       this.loopSearch(chunkArray[0]);
       for (var i = 1; i < chunkArray.length; i++) {
         let arr = chunkArray[i];
-        //TODO: optimise less than 9s ?
+        //REVIEW: optimise less than 10s?
         setTimeout(
           () => {
             this.loopSearch(arr);
@@ -69,7 +69,11 @@ export default {
       let lat = lastMarker.position.lat;
       let lng = lastMarker.position.lng;
 
-      (this.center.lat = lat), (this.center.lng = lng), (this.zoom = 8);
+      this.center = {
+        lat,
+        lng
+      };
+      this.zoom = 8;
     });
   },
 
@@ -90,6 +94,7 @@ export default {
     },
     searchLocation(data) {
       /* global google */
+      // TODO: edge case: if address is invaild;
       let geocoder = new google.maps.Geocoder();
       let address = data.ADDRESS.concat(data.CITY, data.STATE, data.ZIPCODE);
 
@@ -105,10 +110,6 @@ export default {
           console.log("OVER_QUERY_LIMIT");
         }
       });
-    },
-    // receives a place object via the autocomplete component
-    setPlace(place) {
-      this.currentPlace = place;
     }
   }
 };

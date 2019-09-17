@@ -38,19 +38,20 @@ export default {
     };
   },
   mounted() {
+    // get data when user try to preview and map csv column
     EventBus.$on("parse-csv", payLoad => {
       this.csv_payLoad = payLoad;
     });
 
     EventBus.$on("clean-preview-data", () => {
-      (this.csv_payLoad = null),
-        (this.columnMap = {
-          col0: null,
-          col1: null,
-          col2: null,
-          col3: null,
-          col4: null
-        });
+      this.csv_payLoad = null;
+      this.columnMap = {
+        col0: null,
+        col1: null,
+        col2: null,
+        col3: null,
+        col4: null
+      };
     });
   },
   methods: {
