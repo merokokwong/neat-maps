@@ -34,6 +34,7 @@
 <script>
 import { EventBus } from "../eventBus.js";
 import store from "../store.js";
+import Papa from "papaparse";
 
 export default {
   name: "CsvInput",
@@ -50,8 +51,31 @@ export default {
       if (file) {
         store.commit("selectCsv", uuid);
         store.commit("updateCsvList", csv);
-        //open CsvPreview
-        EventBus.$emit("open-csv-preview", uuid);
+
+        Papa.parse(file, {
+          skipEmptyLines: true,
+          complete: result => {
+            let csv_input = {
+              file: csv,
+              uuid: uuid,
+              data: result.data
+            };
+            // TODO: error should be store mutipule errors
+            if (result.data.length > 20) {
+              store.commit("addNewKeyToCsvObj", {
+                error: "File contains more than 20 rows."
+              });
+            } else {
+              // pass CSV data to CsvPreview if no error
+              EventBus.$emit("csv-preview-data", csv_input);
+              //open CsvPreview
+              EventBus.$emit("open-csv-preview", uuid);
+            }
+          },
+          error(errors) {
+            console.log("error", errors);
+          }
+        });
       }
     },
     uniqueId() {

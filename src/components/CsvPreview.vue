@@ -39,7 +39,7 @@ export default {
   },
   mounted() {
     // get data when user try to preview and map csv column
-    EventBus.$on("parse-csv", payLoad => {
+    EventBus.$on("csv-preview-data", payLoad => {
       this.csv_payLoad = payLoad;
     });
 

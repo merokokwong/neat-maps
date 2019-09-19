@@ -10,6 +10,7 @@
           <span :class="{ selected: obj.uuid == currentCsvId }">
             {{ obj.file.name }}
           </span>
+          <span class="file-error-icon" @click="removeFile(obj.uuid)"></span>
           <button
             v-if="obj.data.length > 0"
             class="btn"
@@ -18,13 +19,16 @@
             View in map
           </button>
           <button
-            v-else
+            v-if="obj.data.length === 0 && !obj.error"
             class="btn"
             id="show-preview-modal"
             @click="showPreviewModal(obj.uuid)"
           >
             Preview Data
           </button>
+          <div v-if="obj.error" class="error-msg">
+            {{ obj.error }}
+          </div>
         </li>
       </ol>
     </div>
@@ -65,7 +69,6 @@
 </template>
 
 <script>
-import Papa from "papaparse";
 import { EventBus } from "../eventBus.js";
 import CsvPreview from "./CsvPreview.vue";
 import Spinner from "./Spinner.vue";
@@ -81,6 +84,7 @@ export default {
   },
   data() {
     return {
+      // state in the modal
       isModalVisible: false,
       modalTitle: null,
       isLoading: false,
@@ -115,6 +119,10 @@ export default {
     });
   },
   methods: {
+    removeFile(uuid) {
+      store.commit("selectCsv", uuid);
+      store.commit("removeFile", uuid);
+    },
     viewMap(uuid) {
       store.commit("selectCsv", uuid);
 
@@ -184,27 +192,6 @@ export default {
 
       this.isModalVisible = true;
       this.modalTitle = currentCsvObj.file.name;
-
-      // get the CSV data
-      Papa.parse(csv, {
-        skipEmptyLines: true,
-        complete: result => {
-          let csv_input = {
-            file: csv,
-            uuid: uuid,
-            data: result.data
-          };
-          // pass CSV data to CsvPreview
-          EventBus.$emit("parse-csv", csv_input);
-        },
-        //TODO: return error to user
-        // check row <= 20
-        // check column === 5
-        error(errors) {
-          console.log("error", errors);
-          this.error = errors;
-        }
-      });
     },
     closePreviewModal() {
       this.isModalVisible = false;

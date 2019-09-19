@@ -8,6 +8,20 @@
     color: #fff;
     padding: 0px 5px;
   }
+
+  .file-error-icon {
+    position: relative;
+    &::after {
+  	  font-family: FontAwesome;
+    	content: '\f00d';
+    	font-size: 16px;
+    	position: absolute;
+    	color: #434B67;
+    	cursor: pointer;
+      top: 2px;
+      right: -30px;
+    }
+  }
 }
 //CsvInput
 .upload-container {

@@ -23,6 +23,12 @@ export default new Vuex.Store({
       state.markerColor = [];
       state.markers = [];
     },
+    removeFile(state, uuid) {
+      let originList = state.csvList;
+      let filterOutFile = originList.filter(item => item.uuid !== uuid);
+
+      state.csvList = filterOutFile;
+    },
     updateCsvList(state, newCsv) {
       // will call update when user select new file
       // newCsv = {
@@ -44,6 +50,15 @@ export default new Vuex.Store({
     },
     setUserId(state, userId) {
       state.userId = userId;
+    },
+    addNewKeyToCsvObj(state, kv) {
+      let currentCsvObj = state.csvList.find(
+        obj => obj.uuid === state.currentCsvId
+      );
+      let index = state.csvList.indexOf(currentCsvObj);
+      let newCsv = Object.assign(currentCsvObj, kv);
+
+      Vue.set(state.csvList, index, newCsv);
     }
   },
   actions: {},
