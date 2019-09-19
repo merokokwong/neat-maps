@@ -13,7 +13,7 @@ The mapping will take 10s, trying to avoid hitting the Google Map API OVER_QUERY
 After getting the geo location form Google API, will load each marker into Google Map.  
 
 Validations that haven't implement:
-- check CSV row <= 20
+~~- check CSV row <= 20~~
 - check CSV column === 5
 - check address valid
 
